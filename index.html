@@ -301,6 +301,18 @@
     .modal{border-radius:14px;max-height:85vh;}
   }
   .modal h2{margin-top:0;}
+  .help-section{margin-bottom:16px;}
+  .help-section h3{
+    margin:0 0 6px;
+    font-size:.98rem;
+    color:var(--green-dark);
+  }
+  .help-section p{
+    margin:0 0 8px;
+    font-size:.9rem;
+    line-height:1.5;
+    color:var(--ink);
+  }
   .chiplist{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;}
   .chip{
     background:#F1F2EF;border:1px solid var(--line);border-radius:20px;
@@ -318,11 +330,20 @@
   }
   .toast.show{opacity:1;}
 
-  .helpbox{
-    background:#F6F7F4;border:1px dashed var(--green-line);border-radius:8px;
-    padding:10px 12px;font-size:.85rem;color:var(--ink-soft);line-height:1.5;margin-bottom:14px;
+  header.top{position:relative;}
+  .help-btn{
+    position:absolute;
+    top:14px; right:14px;
+    width:30px; height:30px;
+    border-radius:50%;
+    border:1px solid rgba(255,255,255,.5);
+    background:rgba(255,255,255,.12);
+    color:#fff;
+    font-weight:700;
+    font-size:.95rem;
+    cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
   }
-  .helpbox b{color:var(--ink);}
 
   .toggle-row{
     display:flex;align-items:center;gap:8px;
@@ -367,6 +388,7 @@
 <body>
 
 <header class="top">
+  <button class="help-btn" id="btnHelp" aria-label="Help" title="Help">?</button>
   <p class="club">Myall Park Tennis Club</p>
   <p class="sub">Cash Collections &amp; Bank Deposits</p>
 </header>
@@ -380,14 +402,10 @@
 
     <div class="card">
       <h2>Counting session</h2>
-      <p class="hint">Pick the date you're counting on. Every envelope you enter below is grouped under this date for the bank deposit summary.</p>
+      <p class="hint">Pick the date you're counting on. Every envelope you enter below is grouped under this date for the bank deposit summary. This date is shared with the Summary and Records tabs, so wherever you set it, the others follow.</p>
       <label for="countDate">Collection date (today, unless catching up)</label>
       <input type="date" id="countDate">
-    </div>
-
-    <div class="helpbox" id="helpbox">
-      <b>How this works:</b> open one envelope at a time. Enter what's written on the front, then count the cash inside and enter how many of each note and coin. Save the envelope, then move to the next one. When you're done, check the totals under the <b>Summary</b> tab below.
-      <div style="margin-top:8px;"><button class="btn btn-ghost btn-small" id="hideHelp">Don't show this again</button></div>
+      <button class="btn btn-ghost btn-small" id="btnNewDate" style="margin-top:10px;">Start a new date (today)</button>
     </div>
 
     <div class="card">
@@ -583,6 +601,46 @@
   </div>
 </div>
 
+<!-- Help modal -->
+<div class="modal-backdrop hidden" id="helpModal">
+  <div class="modal">
+    <h2>How this app works</h2>
+    <p class="hint">Counting cash from envelopes and preparing the bank deposit — a quick tour of each tab.</p>
+
+    <div class="help-section">
+      <h3>✎ Count</h3>
+      <p>Pick the <b>Collection date</b> — the day you're counting and banking. This date is shared across all three main tabs, so wherever you set it, the others follow.</p>
+      <p>For each envelope: enter the date written on the front, choose the <b>Activity</b>, then the <b>Session</b> if it applies — Tennis and Pickleball need one, Membership and similar don't and the field disappears automatically.</p>
+      <p>Enter the <b>Expected amount</b> from the envelope, then count the notes and coins into the boxes below. The app totals them for you and flags it clearly if the count doesn't match what's written on the envelope.</p>
+      <p>Tap <b>Save envelope &amp; next</b> to log it and move straight on to the next one. Use <b>Start a new date</b> when you're moving on to a different day's counting.</p>
+    </div>
+
+    <div class="help-section">
+      <h3>🏦 Summary</h3>
+      <p>Pick a date to see everything for that day's banking: the total by activity, the total by session, and a full note-by-note, coin-by-coin breakdown — ready to bag up.</p>
+      <p>Tap <b>Print this summary</b> for a paper copy to go with the deposit.</p>
+    </div>
+
+    <div class="help-section">
+      <h3>📋 Records</h3>
+      <p>Every envelope ever entered, in one list. Filter by date or activity, or search comments. Tap any row to edit or delete it.</p>
+      <p>Download everything as a <b>CSV</b> (for a spreadsheet) or a full <b>JSON backup</b> from here too.</p>
+    </div>
+
+    <div class="help-section">
+      <h3>⚙ Setup</h3>
+      <p>Add or remove the <b>Session</b> and <b>Activity</b> options offered on the Count tab, and choose which activities need a session ticked on.</p>
+      <p>Take a <b>backup</b> now and then, especially before using <b>Delete all data</b> — that action can't be undone.</p>
+    </div>
+
+    <div class="help-section">
+      <p class="field-note" id="helpDataNote">Your data is stored in a shared cloud database and updates live for the whole committee — anyone who opens this link sees the same records, in real time.</p>
+    </div>
+
+    <button class="btn btn-primary btn-block" id="btnCloseHelp">Got it</button>
+  </div>
+</div>
+
 <!-- Printable deposit summary -->
 <div id="printArea"></div>
 
@@ -638,7 +696,7 @@ function loadPrefs(){
     var raw = localStorage.getItem(PREFS_KEY);
     if(raw) return JSON.parse(raw);
   }catch(e){}
-  return { collectionDate: todayStr(), hideHelp: false };
+  return { collectionDate: todayStr() };
 }
 var prefs = loadPrefs();
 function savePrefs(){ localStorage.setItem(PREFS_KEY, JSON.stringify(prefs)); }
@@ -761,8 +819,19 @@ function showView(name){
   document.querySelectorAll("nav.bottom button").forEach(function(b){
     b.classList.toggle("active", b.dataset.view===name);
   });
+  if(name==="count"){
+    document.getElementById("countDate").value = prefs.collectionDate || todayStr();
+    renderEnvList();
+  }
   if(name==="summary") renderSummary();
-  if(name==="records") renderRecords();
+  if(name==="records"){
+    document.getElementById("filterType").value = "";
+    document.getElementById("searchText").value = "";
+    populateFilters();
+    var recDates = uniqueCollectionDates();
+    document.getElementById("filterDate").value = recDates.indexOf(prefs.collectionDate)>=0 ? prefs.collectionDate : "";
+    renderRecords();
+  }
   if(name==="setup") renderSetup();
   window.scrollTo(0,0);
 }
@@ -970,18 +1039,31 @@ document.getElementById("btnSaveEnvelope").addEventListener("click", function(){
 });
 
 document.getElementById("btnGoSummary").addEventListener("click", function(){
-  document.getElementById("summaryDate").value = document.getElementById("countDate").value;
   showView("summary");
 });
 
-document.getElementById("hideHelp").addEventListener("click", function(){
-  prefs.hideHelp = true; savePrefs();
-  document.getElementById("helpbox").style.display = "none";
+document.getElementById("btnNewDate").addEventListener("click", function(){
+  var today = todayStr();
+  document.getElementById("countDate").value = today;
+  prefs.collectionDate = today;
+  savePrefs();
+  resetEnvelopeForm();
+  renderEnvList();
+  toast("Started a new collection date");
+});
+
+document.getElementById("btnHelp").addEventListener("click", function(){
+  document.getElementById("helpModal").classList.remove("hidden");
+});
+document.getElementById("btnCloseHelp").addEventListener("click", function(){
+  document.getElementById("helpModal").classList.add("hidden");
+});
+document.getElementById("helpModal").addEventListener("click", function(e){
+  if(e.target.id==="helpModal") document.getElementById("helpModal").classList.add("hidden");
 });
 
 function initCountView(){
   document.getElementById("countDate").value = prefs.collectionDate || todayStr();
-  if(prefs.hideHelp) document.getElementById("helpbox").style.display = "none";
   resetEnvelopeForm();
   renderEnvList();
 }
@@ -996,7 +1078,6 @@ function uniqueCollectionDates(){
 function populateSummaryDates(){
   var sel = document.getElementById("summaryDate");
   var dates = uniqueCollectionDates();
-  var current = sel.value;
   sel.innerHTML = "";
   if(dates.length===0){
     var op = document.createElement("option");
@@ -1009,10 +1090,14 @@ function populateSummaryDates(){
     op.value = d; op.textContent = fmtDateNice(d);
     sel.appendChild(op);
   });
-  sel.value = dates.indexOf(current)>=0 ? current : dates[0];
+  sel.value = dates.indexOf(prefs.collectionDate)>=0 ? prefs.collectionDate : dates[0];
 }
 
-document.getElementById("summaryDate").addEventListener("change", renderSummaryContent);
+document.getElementById("summaryDate").addEventListener("change", function(e){
+  prefs.collectionDate = e.target.value;
+  savePrefs();
+  renderSummaryContent();
+});
 
 function renderSummary(){
   populateSummaryDates();
@@ -1158,8 +1243,9 @@ function populateFilters(){
   var dSel = document.getElementById("filterDate");
   var tSel = document.getElementById("filterType");
   var curD = dSel.value, curT = tSel.value;
+  var dates = uniqueCollectionDates();
   dSel.innerHTML = '<option value="">All dates</option>';
-  uniqueCollectionDates().forEach(function(d){
+  dates.forEach(function(d){
     var op = document.createElement("option"); op.value=d; op.textContent=fmtDateNice(d);
     dSel.appendChild(op);
   });
@@ -1171,7 +1257,13 @@ function populateFilters(){
   });
   tSel.value = curT;
 }
-document.getElementById("filterDate").addEventListener("change", renderRecords);
+document.getElementById("filterDate").addEventListener("change", function(e){
+  if(e.target.value){
+    prefs.collectionDate = e.target.value;
+    savePrefs();
+  }
+  renderRecords();
+});
 document.getElementById("filterType").addEventListener("change", renderRecords);
 document.getElementById("searchText").addEventListener("input", renderRecords);
 
