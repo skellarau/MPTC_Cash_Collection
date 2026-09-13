@@ -280,7 +280,7 @@
   }
   .rec-row:last-child{border-bottom:none;}
   .rec-row .meta{flex:1;min-width:0;}
-  .rec-row .meta .t1, .rec-row .meta .t2{font-size:.85rem;font-weight:400;color:var(--ink);}
+  .rec-row .meta .t1, .rec-row .meta .t2{display:block;font-size:.85rem;font-weight:400;color:var(--ink);}
   .rec-row .amt{font-weight:700;font-variant-numeric:tabular-nums;font-size:.92rem;white-space:nowrap;}
 
   .modal-backdrop{
@@ -1300,7 +1300,7 @@ function renderRecords(){
     el.className = "rec-row";
     el.innerHTML =
       '<span class="meta"><span class="t1">'+fmtDateNice(r.collectionDate)+' · '+r.type+' · '+r.session+'</span>'+
-      ' - <span class="t2">Envelope date: '+fmtDateNice(r.sessionDate)+(r.comment?" — "+escapeHtml(r.comment):"")+'</span></span>'+
+      '<span class="t2">Envelope date: '+fmtDateNice(r.sessionDate)+(r.comment?" — "+escapeHtml(r.comment):"")+'</span></span>'+
       '<span class="amt">'+fmt(actualOf(r))+'</span>';
     el.addEventListener("click", function(){ openEdit(r.id); });
     wrap.appendChild(el);
