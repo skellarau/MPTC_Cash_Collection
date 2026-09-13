@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#5b3f8c">
+<link rel="manifest" href="manifest.json">
+<title>Five Crowns Scorekeeper</title>
+<style>
+:root{--bg:#f6f3fa;--card:#fff;--ink:#25212b;--muted:#746d7d;--accent:#5b3f8c;--accent2:#8b65bd;--line:#e5deec;--danger:#b52b38}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+header{background:linear-gradient(135deg,var(--accent),var(--accent2));color:white;padding:20px 16px 18px;position:sticky;top:0;z-index:5;box-shadow:0 2px 10px #0002}
+h1{font-size:24px;margin:0 0 4px}.sub{opacity:.85;font-size:13px}
+main{max-width:760px;margin:auto;padding:14px 12px 90px}.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px;box-shadow:0 2px 8px #2b174008}
+.row{display:flex;gap:8px;align-items:center}.between{justify-content:space-between}
+input,button,select{font:inherit}input[type=text],input[type=number]{width:100%;border:1px solid #d7cfdf;border-radius:10px;padding:11px 10px;background:#fff}
+button{border:0;border-radius:11px;padding:11px 14px;font-weight:650;cursor:pointer}.primary{background:var(--accent);color:#fff}.secondary{background:#eee8f3;color:var(--ink)}.danger{background:#fbe8ea;color:var(--danger)}
+.small{font-size:12px;color:var(--muted)}.round-title{font-weight:750;font-size:18px}.round-num{color:var(--accent)}
+.players{display:grid;grid-template-columns:1fr 1fr;gap:10px}.player-name{font-weight:700;margin-bottom:4px}
+.score-input{font-size:18px;text-align:center}.score-total{font-size:26px;font-weight:800;color:var(--accent);text-align:center}
+table{width:100%;border-collapse:collapse;font-size:14px}th,td{padding:8px 5px;border-bottom:1px solid var(--line);text-align:center}th:first-child,td:first-child{text-align:left}th{color:var(--muted);font-weight:650}
+.winner{font-weight:800;color:#2d7b43}.hidden{display:none!important}.actions{display:flex;gap:8px;flex-wrap:wrap}
+@media(min-width:600px){.players{grid-template-columns:repeat(4,1fr)}}
+</style>
+</head>
+<body>
+<header><h1>🃏 Five Crowns</h1><div class="sub">Simple scorekeeper • 11 rounds • lowest total wins</div></header>
+<main>
+<section id="setup" class="card">
+  <div class="round-title">New game</div><p class="small">Add 2–7 players. You can change names before starting.</p>
+  <div id="nameInputs"></div>
+  <div class="actions" style="margin-top:10px">
+    <button class="secondary" onclick="addPlayer()">+ Add player</button>
+    <button class="primary" onclick="startGame()">Start game</button>
+  </div>
+</section>
+
+<section id="game" class="hidden">
+  <div class="card row between">
+    <div><div class="small">ROUND</div><div class="round-title"><span id="roundNo"></span> — <span id="cards"></span> cards</div></div>
+    <button class="secondary" onclick="confirmNew()">New game</button>
+  </div>
+  <div class="card">
+    <div class="small">ENTER SCORES FOR THIS ROUND</div>
+    <div id="scoreInputs" class="players" style="margin-top:10px"></div>
+    <div class="actions" style="margin-top:12px">
+      <button class="primary" onclick="saveRound()">Save round</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="row between"><div class="round-title">Scoreboard</div><div class="small">Lowest score is best</div></div>
+    <div style="overflow:auto;margin-top:8px"><table id="board"></table></div>
+  </div>
+  <div class="card actions">
+    <button class="secondary" onclick="undoRound()">Undo last round</button>
+    <button class="danger" onclick="resetGame()">Reset saved game</button>
+  </div>
+</section>
+
+<section id="finished" class="card hidden">
+  <div class="round-title">🏆 Game finished</div>
+  <p id="winnerText"></p>
+  <div id="finalBoard" style="overflow:auto"></div>
+  <button class="primary" style="margin-top:12px" onclick="confirmNew()">Play again</button>
+</section>
+</main>
+<script>
+const KEY='fiveCrownsScorekeeperV1';
+let state={players:[],round:0,scores:[]};
+
+function load(){try{let x=JSON.parse(localStorage.getItem(KEY));if(x){state=x; if(state.round<11) showGame(); else finish();}}catch(e){}}
+function persist(){localStorage.setItem(KEY,JSON.stringify(state))}
+function addPlayer(){let n=document.querySelectorAll('#nameInputs input').length;if(n>=7)return; addName(n+1)}
+function addName(i,val=''){let d=document.createElement('div');d.className='row';d.style.marginTop='8px';d.innerHTML=`<input type="text" maxlength="20" placeholder="Player ${i}" value="${esc(val)}">`;document.getElementById('nameInputs').appendChild(d)}
+function esc(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function startGame(){
+ let names=[...document.querySelectorAll('#nameInputs input')].map((x,i)=>x.value.trim()||`Player ${i+1}`);
+ if(names.length<2)return alert('Add at least 2 players.');
+ state={players:names,round:0,scores:Array.from({length:11},()=>Array(names.length).fill(null))};
+ persist();showGame();
+}
+function showGame(){document.getElementById('setup').classList.add('hidden');document.getElementById('finished').classList.add('hidden');document.getElementById('game').classList.remove('hidden');render()}
+function totals(){return state.players.map((_,p)=>state.scores.reduce((a,r)=>a+(Number(r?.[p])||0),0))}
+function render(){
+ let r=state.round; document.getElementById('roundNo').textContent=r+1;document.getElementById('cards').textContent=r+3;
+ let box=document.getElementById('scoreInputs');box.innerHTML='';
+ state.players.forEach((n,p)=>{let d=document.createElement('div');d.innerHTML=`<div class="player-name">${esc(n)}</div><input class="score-input" id="s${p}" type="number" min="0" step="1" inputmode="numeric" placeholder="0">`;box.appendChild(d)});
+ let t=totals(), rows='<tr><th>Round</th>'+state.players.map(esc).map(n=>`<th>${n}</th>`).join('')+'</tr>';
+ for(let i=0;i<11;i++){if(i>r && !state.scores[i].some(x=>x!==null))break;rows+=`<tr><td>${i+1}</td>`+state.players.map((_,p)=>`<td>${state.scores[i][p]??'—'}</td>`).join('')+'</tr>`}
+ rows+=`<tr><th>Total</th>`+t.map(x=>`<th>${x}</th>`).join('')+'</tr>';document.getElementById('board').innerHTML=rows;
+}
+function saveRound(){
+ let vals=state.players.map((_,p)=>document.getElementById('s'+p).value);
+ if(vals.some(v=>v===''||Number(v)<0||!Number.isInteger(Number(v))))return alert('Enter a whole-number score for every player.');
+ state.scores[state.round]=vals.map(Number);state.round++;persist();state.round>=11?finish():render();
+}
+function undoRound(){if(state.round<=0)return;state.round--;state.scores[state.round]=Array(state.players.length).fill(null);persist();render()}
+function finish(){
+ document.getElementById('game').classList.add('hidden');document.getElementById('setup').classList.add('hidden');document.getElementById('finished').classList.remove('hidden');
+ let t=totals(), min=Math.min(...t), winners=state.players.filter((_,i)=>t[i]===min);
+ document.getElementById('winnerText').innerHTML=`Winner${winners.length>1?'s':''}: <b>${winners.map(esc).join(', ')}</b> with ${min} point${min===1?'':'s'}.`;
+ let order=state.players.map((n,i)=>({n,t:t[i]})).sort((a,b)=>a.t-b.t);
+ document.getElementById('finalBoard').innerHTML='<table><tr><th>Place</th><th>Player</th><th>Total</th></tr>'+order.map((x,i)=>`<tr class="${i===0?'winner':''}"><td>${i+1}</td><td>${esc(x.n)}</td><td>${x.t}</td></tr>`).join('')+'</table>';
+}
+function resetGame(){if(confirm('Delete this game?')){localStorage.removeItem(KEY);location.reload()}}
+function confirmNew(){if(confirm('Start a new game? The current game will be replaced.')){localStorage.removeItem(KEY);location.reload()}}
+for(let i=1;i<=4;i++)addName(i);
+load();
+</script>
+<script>if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');</script>
+</body></html>
