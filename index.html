@@ -122,37 +122,42 @@
   .denom-grid{
     display:grid;
     grid-template-columns:1fr 1fr;
-    gap:8px;
+    gap:6px;
     margin-top:10px;
+    min-width:0;
   }
   .denom-cell{
     display:flex;
     align-items:center;
-    gap:8px;
+    gap:5px;
     background:#F6F7F4;
     border:1px solid var(--line);
     border-radius:8px;
-    padding:6px 8px;
+    padding:6px 6px;
+    min-width:0;
   }
   .denom-cell .lbl{
-    width:52px;
+    width:38px;
     font-weight:700;
-    font-size:.88rem;
+    font-size:.82rem;
     color:var(--green-dark);
     flex-shrink:0;
   }
   .denom-cell input{
-    width:56px;
+    width:38px;
     text-align:center;
-    padding:6px 4px;
+    padding:6px 2px;
     flex-shrink:0;
   }
   .denom-cell .sub{
     margin-left:auto;
     font-variant-numeric:tabular-nums;
-    font-size:.85rem;
+    font-size:.78rem;
     color:var(--ink-soft);
     white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    min-width:0;
   }
   .denom-section-label{
     margin-top:14px;
