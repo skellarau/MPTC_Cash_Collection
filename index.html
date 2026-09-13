@@ -379,6 +379,16 @@
     font-size:.92rem;line-height:1.6;
   }
   #setupNotice code{background:#F1F2EF;padding:1px 5px;border-radius:4px;font-size:.85em;}
+  .account-line{
+    margin:6px 28px 0 0;
+    font-size:.75rem;
+    color:#D8E6D9;
+  }
+  .account-line .logout-link{
+    background:none;border:none;padding:0;
+    color:#fff;text-decoration:underline;
+    font-size:.75rem;font-weight:600;cursor:pointer;
+  }
 </style>
 <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore-compat.js"></script>
@@ -390,6 +400,7 @@
   <button class="help-btn" id="btnHelp" aria-label="Help" title="Help">?</button>
   <p class="club">Myall Park Tennis Club</p>
   <p class="sub">Cash Collections &amp; Bank Deposits</p>
+  <p class="account-line" id="accountLine" style="display:none;">Signed in as <span id="currentUserEmailHeader">—</span> &middot; <button class="logout-link" id="btnSignOutHeader">Logout</button></p>
 </header>
 <div id="firebaseStatus">Connecting to shared database...</div>
 <div id="setupNotice" style="display:none;"></div>
@@ -741,6 +752,7 @@ function showOnly(which){
   document.querySelector("nav.bottom").style.display = which==="main" ? "" : "none";
   document.getElementById("loginScreen").style.display = which==="login" ? "block" : "none";
   document.getElementById("setupNotice").style.display = which==="setup" ? "block" : "none";
+  document.getElementById("accountLine").style.display = which==="main" ? "block" : "none";
 }
 function showSetupNotice(html){
   showOnly("setup");
@@ -752,6 +764,7 @@ function showLoginScreen(){
 function showMain(user){
   showOnly("main");
   document.getElementById("currentUserEmail").textContent = user.email || "(unknown)";
+  document.getElementById("currentUserEmailHeader").textContent = user.email || "(unknown)";
 }
 
 function initFirebase(){
@@ -822,6 +835,10 @@ document.getElementById("btnForgotPassword").addEventListener("click", function(
   });
 });
 document.getElementById("btnSignOut").addEventListener("click", function(){
+  if(!confirm("Sign out of the app?")) return;
+  firebase.auth().signOut();
+});
+document.getElementById("btnSignOutHeader").addEventListener("click", function(){
   if(!confirm("Sign out of the app?")) return;
   firebase.auth().signOut();
 });
