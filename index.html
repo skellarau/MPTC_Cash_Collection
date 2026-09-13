@@ -393,6 +393,19 @@
 </header>
 <div id="firebaseStatus">Connecting to shared database...</div>
 <div id="setupNotice" style="display:none;"></div>
+<div id="loginScreen" style="display:none;">
+  <div class="card" style="max-width:400px;margin:40px auto 0;">
+    <h2>Committee sign-in</h2>
+    <p class="hint">Enter the email and password you were given to access the shared cash collection data. Ask a committee admin if you don't have one yet.</p>
+    <label for="loginEmail">Email</label>
+    <input type="email" id="loginEmail" autocomplete="username">
+    <label for="loginPassword">Password</label>
+    <input type="password" id="loginPassword" autocomplete="current-password">
+    <div class="alert warn" id="loginError" style="display:none;"></div>
+    <button class="btn btn-primary btn-block" id="btnSignIn" style="margin-top:14px;">Sign in</button>
+    <button class="btn btn-ghost btn-block" id="btnForgotPassword" style="margin-top:8px;">Forgot password?</button>
+  </div>
+</div>
 
 <main id="main-content">
 
@@ -531,8 +544,14 @@
     </div>
 
     <div class="card">
+      <h2>Account</h2>
+      <p class="hint">Signed in as <b id="currentUserEmail">—</b></p>
+      <button class="btn btn-ghost btn-block" id="btnSignOut">Sign out</button>
+    </div>
+
+    <div class="card">
       <h2>Backup &amp; restore</h2>
-      <p class="hint">Everything is stored on this device only. Take a backup now and then, especially before clearing anything.</p>
+      <p class="hint">This is a shared backup for the whole committee's data in the cloud database. Take one now and then, especially before clearing anything.</p>
       <div class="btn-row">
         <button class="btn btn-secondary" id="btnExportJson2">Download backup</button>
         <button class="btn btn-secondary" id="btnImportJson">Restore from backup</button>
@@ -604,7 +623,7 @@
 <div class="modal-backdrop hidden" id="helpModal">
   <div class="modal">
     <h2>How this app works</h2>
-    <p class="hint">Counting cash from envelopes and preparing the bank deposit — a quick tour of each tab.</p>
+    <p class="hint">Counting cash from envelopes and preparing the bank deposit — a quick tour of each tab. You'll need to sign in with the email and password you were given before you can use the app.</p>
 
     <div class="help-section">
       <h3>✎ Count</h3>
@@ -633,7 +652,7 @@
     </div>
 
     <div class="help-section">
-      <p class="field-note" id="helpDataNote">Your data is stored in a shared cloud database and updates live for the whole committee — anyone who opens this link sees the same records, in real time.</p>
+      <p class="field-note" id="helpDataNote">Your data is stored in a shared cloud database and updates live for the whole committee — anyone signed in sees the same records, in real time.</p>
     </div>
 
     <button class="btn btn-primary btn-block" id="btnCloseHelp">Got it</button>
@@ -717,12 +736,22 @@ function setStatus(text, isErr){
   el.textContent = text;
   el.className = isErr ? "err" : "";
 }
+function showOnly(which){
+  document.getElementById("main-content").style.display = which==="main" ? "" : "none";
+  document.querySelector("nav.bottom").style.display = which==="main" ? "" : "none";
+  document.getElementById("loginScreen").style.display = which==="login" ? "block" : "none";
+  document.getElementById("setupNotice").style.display = which==="setup" ? "block" : "none";
+}
 function showSetupNotice(html){
-  document.getElementById("main-content").style.display = "none";
-  document.querySelector("nav.bottom").style.display = "none";
-  var n = document.getElementById("setupNotice");
-  n.style.display = "block";
-  n.innerHTML = html;
+  showOnly("setup");
+  document.getElementById("setupNotice").innerHTML = html;
+}
+function showLoginScreen(){
+  showOnly("login");
+}
+function showMain(user){
+  showOnly("main");
+  document.getElementById("currentUserEmail").textContent = user.email || "(unknown)";
 }
 
 function initFirebase(){
@@ -751,16 +780,51 @@ function initFirebase(){
     if(user){
       firebaseReady = true;
       setStatus("Connected \u2014 live with the committee");
+      showMain(user);
       attachListeners();
+    } else {
+      firebaseReady = false;
+      setStatus("Please sign in", true);
+      showLoginScreen();
     }
-  });
-  firebase.auth().signInAnonymously().catch(function(err){
-    setStatus("Couldn't connect: "+err.message, true);
   });
 
   window.addEventListener("online", function(){ if(firebaseReady) setStatus("Connected \u2014 live with the committee"); });
   window.addEventListener("offline", function(){ setStatus("Offline \u2014 changes will sync when back online", true); });
 }
+
+function doSignIn(){
+  var email = document.getElementById("loginEmail").value.trim();
+  var password = document.getElementById("loginPassword").value;
+  var errEl = document.getElementById("loginError");
+  errEl.style.display = "none";
+  if(!email || !password){
+    errEl.textContent = "Enter both your email and password.";
+    errEl.style.display = "block";
+    return;
+  }
+  firebase.auth().signInWithEmailAndPassword(email, password).catch(function(err){
+    errEl.textContent = "Couldn't sign in: "+err.message;
+    errEl.style.display = "block";
+  });
+}
+document.getElementById("btnSignIn").addEventListener("click", doSignIn);
+document.getElementById("loginPassword").addEventListener("keydown", function(e){
+  if(e.key==="Enter") doSignIn();
+});
+document.getElementById("btnForgotPassword").addEventListener("click", function(){
+  var email = document.getElementById("loginEmail").value.trim();
+  if(!email){ alert("Enter your email address above first, then tap Forgot password."); return; }
+  firebase.auth().sendPasswordResetEmail(email).then(function(){
+    alert("Password reset email sent to "+email+". Check your inbox.");
+  }).catch(function(err){
+    alert("Couldn't send reset email: "+err.message);
+  });
+});
+document.getElementById("btnSignOut").addEventListener("click", function(){
+  if(!confirm("Sign out of the app?")) return;
+  firebase.auth().signOut();
+});
 
 function attachListeners(){
   settingsDocRef.onSnapshot(function(doc){
