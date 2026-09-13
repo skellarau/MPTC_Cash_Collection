@@ -1,0 +1,1493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Myall Park Tennis Club — Cash Collections</title>
+<style>
+  :root{
+    --bg:#EEF1EA;
+    --surface:#FFFFFF;
+    --ink:#152018;
+    --ink-soft:#4B5A4F;
+    --green:#2F5233;
+    --green-dark:#1D3620;
+    --green-line:#C6D2C3;
+    --ball:#CFE04A;
+    --ball-ink:#3A4A12;
+    --clay:#B5533C;
+    --clay-soft:#F5E4DF;
+    --amber:#8A6116;
+    --amber-soft:#FBF0DA;
+    --line:#DBDFD6;
+    --radius:10px;
+    --shadow:0 1px 2px rgba(21,32,24,.08);
+    font-size:16px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    padding-bottom:78px;
+  }
+  header.top{
+    background:var(--green);
+    color:#fff;
+    padding:18px 16px 16px;
+  }
+  header.top .club{
+    font-family:Georgia,"Times New Roman",serif;
+    font-size:1.5rem;
+    letter-spacing:.2px;
+    margin:0;
+  }
+  header.top .sub{
+    margin:2px 0 0;
+    font-size:.92rem;
+    color:#D8E6D9;
+  }
+  main{
+    max-width:640px;
+    margin:0 auto;
+    padding:14px 12px 24px;
+  }
+  .view{display:none;}
+  .view.active{display:block;}
+  .card{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:16px;
+    margin-bottom:14px;
+  }
+  .card h2{
+    margin:0 0 4px;
+    font-size:1.08rem;
+    color:var(--green-dark);
+  }
+  .card p.hint{
+    margin:0 0 12px;
+    color:var(--ink-soft);
+    font-size:.9rem;
+    line-height:1.4;
+  }
+  label{
+    display:block;
+    font-size:.82rem;
+    font-weight:600;
+    color:var(--ink-soft);
+    margin:12px 0 4px;
+  }
+  label:first-of-type{margin-top:0;}
+  input[type="date"],input[type="number"],input[type="text"],select,textarea{
+    width:100%;
+    padding:10px 10px;
+    font-size:1rem;
+    border:1px solid var(--line);
+    border-radius:8px;
+    background:#fff;
+    color:var(--ink);
+    font-family:inherit;
+  }
+  input:focus,select:focus,textarea:focus{
+    outline:2px solid var(--green);
+    outline-offset:1px;
+  }
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+  .btn{
+    display:inline-block;
+    border:none;
+    border-radius:8px;
+    padding:12px 16px;
+    font-size:1rem;
+    font-weight:600;
+    cursor:pointer;
+    text-align:center;
+  }
+  .btn-primary{background:var(--green);color:#fff;width:100%;}
+  .btn-primary:active{background:var(--green-dark);}
+  .btn-secondary{background:#fff;color:var(--green-dark);border:1px solid var(--green);}
+  .btn-danger{background:#fff;color:var(--clay);border:1px solid var(--clay);}
+  .btn-ghost{background:transparent;color:var(--ink-soft);border:1px solid var(--line);}
+  .btn-small{padding:7px 10px;font-size:.85rem;font-weight:600;border-radius:7px;}
+  .btn-block{width:100%;margin-top:10px;}
+  .btn-row{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;}
+  .btn-row .btn{flex:1;}
+
+  .denom-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+    margin-top:10px;
+  }
+  .denom-cell{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    background:#F6F7F4;
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:6px 8px;
+  }
+  .denom-cell .lbl{
+    width:52px;
+    font-weight:700;
+    font-size:.88rem;
+    color:var(--green-dark);
+    flex-shrink:0;
+  }
+  .denom-cell input{
+    width:56px;
+    text-align:center;
+    padding:6px 4px;
+    flex-shrink:0;
+  }
+  .denom-cell .sub{
+    margin-left:auto;
+    font-variant-numeric:tabular-nums;
+    font-size:.85rem;
+    color:var(--ink-soft);
+    white-space:nowrap;
+  }
+  .denom-section-label{
+    margin-top:14px;
+    font-size:.78rem;
+    text-transform:none;
+    color:var(--ink-soft);
+    font-weight:700;
+  }
+
+  .compare{
+    margin-top:14px;
+    padding:12px;
+    border-radius:8px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .compare.ok{background:#E8F1E4;border:1px solid #BFDDB3;}
+  .compare.warn{background:var(--amber-soft);border:1px solid #E7CE97;}
+  .compare.neutral{background:#F1F2EF;border:1px solid var(--line);}
+  .compare .amt{font-size:1.3rem;font-weight:700;font-variant-numeric:tabular-nums;}
+  .compare .tag{font-size:.85rem;font-weight:700;}
+  .compare.ok .tag{color:#2C6B22;}
+  .compare.warn .tag{color:var(--amber);}
+  .compare .row{display:flex;flex-direction:column;}
+  .compare .row .k{font-size:.75rem;color:var(--ink-soft);}
+
+  .envlist{margin-top:4px;}
+  .env-item{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:10px 4px;
+    border-bottom:1px solid var(--line);
+    cursor:pointer;
+  }
+  .env-item:last-child{border-bottom:none;}
+  .env-item .dot{
+    width:9px;height:9px;border-radius:50%;flex-shrink:0;
+  }
+  .dot.ok{background:#3E8E2E;}
+  .dot.warn{background:var(--amber);}
+  .dot.na{background:#B9C0B6;}
+  .env-item .meta{flex:1;min-width:0;}
+  .env-item .meta .t1{font-weight:600;font-size:.94rem;}
+  .env-item .meta .t2{font-size:.8rem;color:var(--ink-soft);}
+  .env-item .amt{font-weight:700;font-variant-numeric:tabular-nums;}
+  .env-item .chev{color:var(--ink-soft);}
+
+  .empty{
+    text-align:center;
+    padding:30px 10px;
+    color:var(--ink-soft);
+  }
+
+  table.summary-table{width:100%;border-collapse:collapse;margin-top:6px;}
+  table.summary-table th, table.summary-table td{
+    text-align:left;
+    padding:7px 4px;
+    border-bottom:1px solid var(--line);
+    font-size:.92rem;
+  }
+  table.summary-table th{color:var(--ink-soft);font-weight:600;font-size:.78rem;}
+  table.summary-table td.num, table.summary-table th.num{text-align:right;font-variant-numeric:tabular-nums;}
+  table.summary-table tr.total-row td{font-weight:700;border-top:2px solid var(--green);border-bottom:none;}
+
+  .grand{
+    text-align:center;
+    margin:16px 0 4px;
+  }
+  .grand .lbl{font-size:.82rem;color:var(--ink-soft);font-weight:600;}
+  .grand .val{font-size:2.1rem;font-weight:700;color:var(--green-dark);font-variant-numeric:tabular-nums;}
+
+  .alert{
+    padding:10px 12px;
+    border-radius:8px;
+    font-size:.88rem;
+    margin-top:10px;
+  }
+  .alert.warn{background:var(--amber-soft);border:1px solid #E7CE97;color:var(--amber);}
+  .alert.ok{background:#E8F1E4;border:1px solid #BFDDB3;color:#2C6B22;}
+
+  nav.bottom{
+    position:fixed;
+    bottom:0;left:0;right:0;
+    background:#fff;
+    border-top:1px solid var(--line);
+    display:flex;
+    padding:6px 4px calc(6px + env(safe-area-inset-bottom));
+    z-index:20;
+  }
+  nav.bottom button{
+    flex:1;
+    background:none;
+    border:none;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:2px;
+    padding:6px 2px;
+    color:var(--ink-soft);
+    font-size:.72rem;
+    font-weight:600;
+    cursor:pointer;
+    border-radius:8px;
+  }
+  nav.bottom button .ic{font-size:1.25rem;line-height:1;}
+  nav.bottom button.active{color:var(--green-dark);background:#EAF2E7;}
+
+  .field-note{font-size:.78rem;color:var(--ink-soft);margin-top:4px;}
+
+  .search-row{display:flex;gap:8px;margin-bottom:10px;}
+  .search-row select, .search-row input{flex:1;}
+
+  .rec-row{
+    display:flex;align-items:center;gap:8px;
+    padding:9px 2px;border-bottom:1px solid var(--line);
+  }
+  .rec-row:last-child{border-bottom:none;}
+  .rec-row .meta{flex:1;min-width:0;}
+  .rec-row .meta .t1{font-size:.92rem;font-weight:600;}
+  .rec-row .meta .t2{font-size:.78rem;color:var(--ink-soft);}
+  .rec-row .amt{font-weight:700;font-variant-numeric:tabular-nums;font-size:.92rem;white-space:nowrap;}
+
+  .modal-backdrop{
+    position:fixed;inset:0;background:rgba(21,32,24,.45);
+    display:flex;align-items:flex-end;justify-content:center;
+    z-index:50;
+  }
+  .modal-backdrop.hidden{display:none;}
+  .modal{
+    background:#fff;border-radius:14px 14px 0 0;
+    width:100%;max-width:640px;
+    max-height:88vh;overflow-y:auto;
+    padding:18px 16px calc(20px + env(safe-area-inset-bottom));
+  }
+  @media (min-width:680px){
+    .modal-backdrop{align-items:center;}
+    .modal{border-radius:14px;max-height:85vh;}
+  }
+  .modal h2{margin-top:0;}
+  .chiplist{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;}
+  .chip{
+    background:#F1F2EF;border:1px solid var(--line);border-radius:20px;
+    padding:6px 12px;font-size:.85rem;display:flex;align-items:center;gap:6px;
+  }
+  .chip button{
+    background:none;border:none;color:var(--clay);font-weight:700;cursor:pointer;padding:0;font-size:.9rem;
+  }
+  .toast{
+    position:fixed;left:50%;bottom:88px;transform:translateX(-50%);
+    background:var(--green-dark);color:#fff;
+    padding:10px 16px;border-radius:20px;font-size:.88rem;
+    box-shadow:0 4px 14px rgba(0,0,0,.25);
+    z-index:60;opacity:0;pointer-events:none;transition:opacity .25s ease;
+  }
+  .toast.show{opacity:1;}
+
+  .helpbox{
+    background:#F6F7F4;border:1px dashed var(--green-line);border-radius:8px;
+    padding:10px 12px;font-size:.85rem;color:var(--ink-soft);line-height:1.5;margin-bottom:14px;
+  }
+  .helpbox b{color:var(--ink);}
+
+  .toggle-row{
+    display:flex;align-items:center;gap:8px;
+    padding:7px 2px;border-bottom:1px solid var(--line);
+    font-size:.9rem;
+  }
+  .toggle-row:last-child{border-bottom:none;}
+  .toggle-row input{width:auto;}
+
+  #printArea{display:none;}
+
+  @media print{
+    body *{visibility:hidden;}
+    header.top, nav.bottom{display:none !important;}
+    #printArea, #printArea *{visibility:visible;}
+    #printArea{
+      display:block;
+      position:absolute;top:0;left:0;width:100%;
+      padding:0;
+    }
+    .no-print{display:none !important;}
+  }
+  #firebaseStatus{
+    text-align:center;
+    font-size:.78rem;
+    padding:6px 10px;
+    background:#1D3620;
+    color:#CFE04A;
+  }
+  #firebaseStatus.err{background:#F5E4DF;color:#B5533C;}
+  #setupNotice{
+    max-width:640px;margin:16px auto;padding:16px;
+    background:#fff;border:1px solid #DBDFD6;border-radius:10px;
+    font-size:.92rem;line-height:1.6;
+  }
+  #setupNotice code{background:#F1F2EF;padding:1px 5px;border-radius:4px;font-size:.85em;}
+</style>
+<script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-auth-compat.js"></script>
+</head>
+<body>
+
+<header class="top">
+  <p class="club">Myall Park Tennis Club</p>
+  <p class="sub">Cash Collections &amp; Bank Deposits</p>
+</header>
+<div id="firebaseStatus">Connecting to shared database...</div>
+<div id="setupNotice" style="display:none;"></div>
+
+<main id="main-content">
+
+  <!-- ===================== COUNT VIEW ===================== -->
+  <section id="view-count" class="view active">
+
+    <div class="card">
+      <h2>Counting session</h2>
+      <p class="hint">Pick the date you're counting on. Every envelope you enter below is grouped under this date for the bank deposit summary.</p>
+      <label for="countDate">Collection date (today, unless catching up)</label>
+      <input type="date" id="countDate">
+    </div>
+
+    <div class="helpbox" id="helpbox">
+      <b>How this works:</b> open one envelope at a time. Enter what's written on the front, then count the cash inside and enter how many of each note and coin. Save the envelope, then move to the next one. When you're done, check the totals under the <b>Summary</b> tab below.
+      <div style="margin-top:8px;"><button class="btn btn-ghost btn-small" id="hideHelp">Don't show this again</button></div>
+    </div>
+
+    <div class="card">
+      <h2 id="envelopeTitle">Envelope</h2>
+      <p class="hint">Fill in what's on the front of the envelope first.</p>
+
+      <div class="row2">
+        <div>
+          <label for="envSessionDate">Date on envelope</label>
+          <input type="date" id="envSessionDate">
+        </div>
+        <div>
+          <label for="envType">Activity</label>
+          <select id="envType"></select>
+        </div>
+      </div>
+
+      <div id="envSessionField">
+        <label for="envSession">Session</label>
+        <select id="envSession"></select>
+      </div>
+
+      <label for="envExpected">Expected amount (written on envelope)</label>
+      <input type="number" id="envExpected" inputmode="decimal" step="0.05" min="0" placeholder="e.g. 145.00">
+      <p class="field-note">Leave blank if nothing was written on the envelope.</p>
+
+      <div class="denom-section-label">Notes</div>
+      <div class="denom-grid" id="notesGrid"></div>
+
+      <div class="denom-section-label">Coins</div>
+      <div class="denom-grid" id="coinsGrid"></div>
+
+      <div class="compare neutral" id="compareBox">
+        <div class="row"><span class="k">Envelope says</span><span class="amt" id="cmpExpected">—</span></div>
+        <div class="row"><span class="k">Counted (actual)</span><span class="amt" id="cmpActual">$0.00</span></div>
+        <div class="tag" id="cmpTag"></div>
+      </div>
+
+      <label for="envComment">Comment (optional)</label>
+      <textarea id="envComment" rows="2" placeholder="e.g. torn note, coin looked odd, envelope unlabelled..."></textarea>
+
+      <div class="btn-row">
+        <button class="btn btn-ghost" id="btnClearEnvelope">Clear</button>
+        <button class="btn btn-primary" id="btnSaveEnvelope" style="flex:2;">Save envelope &amp; next</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Envelopes counted for this date</h2>
+      <p class="hint" id="envListHint">None yet — save your first envelope above.</p>
+      <div class="envlist" id="envList"></div>
+      <button class="btn btn-secondary btn-block" id="btnGoSummary">Finish &amp; view deposit summary →</button>
+    </div>
+
+  </section>
+
+  <!-- ===================== SUMMARY VIEW ===================== -->
+  <section id="view-summary" class="view">
+
+    <div class="card">
+      <h2>Bank deposit summary</h2>
+      <p class="hint">Pick a collection date to see what should go in the deposit bag.</p>
+      <label for="summaryDate">Collection date</label>
+      <select id="summaryDate"></select>
+    </div>
+
+    <div id="summaryContent"></div>
+
+  </section>
+
+  <!-- ===================== RECORDS VIEW ===================== -->
+  <section id="view-records" class="view">
+    <div class="card">
+      <h2>All records</h2>
+      <p class="hint">Every envelope ever entered. Tap one to edit or delete it.</p>
+      <div class="search-row">
+        <select id="filterDate"><option value="">All dates</option></select>
+        <select id="filterType"><option value="">All activities</option></select>
+      </div>
+      <input type="text" id="searchText" placeholder="Search comments...">
+    </div>
+    <div class="card" id="recordsCard">
+      <div id="recList"></div>
+    </div>
+    <div class="card">
+      <div class="grand">
+        <div class="lbl" id="recordsTotalLabel">Total collected</div>
+        <div class="val" id="recordsTotalValue">$0.00</div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Export</h2>
+      <p class="hint">Download a copy of everything for your own records or a spreadsheet.</p>
+      <div class="btn-row">
+        <button class="btn btn-secondary" id="btnExportCsv">Export as CSV</button>
+        <button class="btn btn-secondary" id="btnExportJson">Backup (JSON)</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== SETUP VIEW ===================== -->
+  <section id="view-setup" class="view">
+
+    <div class="card">
+      <h2>Sessions</h2>
+      <p class="hint">The time-of-day options shown when entering an envelope.</p>
+      <div class="chiplist" id="sessionChips"></div>
+      <div class="row2" style="margin-top:10px;">
+        <input type="text" id="newSession" placeholder="Add a session e.g. Twilight">
+        <button class="btn btn-secondary" id="btnAddSession">Add</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Activities</h2>
+      <p class="hint">The activity options shown when entering an envelope.</p>
+      <div class="chiplist" id="typeChips"></div>
+      <div class="row2" style="margin-top:10px;">
+        <input type="text" id="newType" placeholder="Add an activity e.g. Coaching">
+        <button class="btn btn-secondary" id="btnAddType">Add</button>
+      </div>
+      <p class="hint" style="margin-top:14px;">Tick the activities that need a session (AM/PM/Night) picked, like Tennis and Pickleball. Leave activities like Membership unticked — their session is set to "NA" automatically.</p>
+      <div id="typeSessionToggles"></div>
+    </div>
+
+    <div class="card">
+      <h2>Backup &amp; restore</h2>
+      <p class="hint">Everything is stored on this device only. Take a backup now and then, especially before clearing anything.</p>
+      <div class="btn-row">
+        <button class="btn btn-secondary" id="btnExportJson2">Download backup</button>
+        <button class="btn btn-secondary" id="btnImportJson">Restore from backup</button>
+      </div>
+      <input type="file" id="fileImport" accept="application/json" style="display:none;">
+    </div>
+
+    <div class="card">
+      <h2>Start over</h2>
+      <p class="hint">Deletes every record on this device. This cannot be undone — take a backup first.</p>
+      <button class="btn btn-danger btn-block" id="btnClearAll">Delete all data</button>
+    </div>
+
+  </section>
+
+</main>
+
+<nav class="bottom">
+  <button data-view="count" class="active"><span class="ic">✎</span>Count</button>
+  <button data-view="summary"><span class="ic">🏦</span>Summary</button>
+  <button data-view="records"><span class="ic">📋</span>Records</button>
+  <button data-view="setup"><span class="ic">⚙</span>Setup</button>
+</nav>
+
+<div class="toast" id="toast"></div>
+
+<!-- Edit record modal -->
+<div class="modal-backdrop hidden" id="editModal">
+  <div class="modal">
+    <h2>Edit envelope</h2>
+    <label for="editCollectionDate">Collection date</label>
+    <input type="date" id="editCollectionDate">
+    <div class="row2">
+      <div>
+        <label for="editSessionDate">Date on envelope</label>
+        <input type="date" id="editSessionDate">
+      </div>
+      <div>
+        <label for="editType">Activity</label>
+        <select id="editType"></select>
+      </div>
+    </div>
+    <div id="editSessionField">
+      <label for="editSession">Session</label>
+      <select id="editSession"></select>
+    </div>
+    <label for="editExpected">Expected amount</label>
+    <input type="number" id="editExpected" inputmode="decimal" step="0.05" min="0">
+    <div class="denom-section-label">Notes</div>
+    <div class="denom-grid" id="editNotesGrid"></div>
+    <div class="denom-section-label">Coins</div>
+    <div class="denom-grid" id="editCoinsGrid"></div>
+    <div class="compare neutral" id="editCompareBox">
+      <div class="row"><span class="k">Envelope says</span><span class="amt" id="editCmpExpected">—</span></div>
+      <div class="row"><span class="k">Counted (actual)</span><span class="amt" id="editCmpActual">$0.00</span></div>
+      <div class="tag" id="editCmpTag"></div>
+    </div>
+    <label for="editComment">Comment</label>
+    <textarea id="editComment" rows="2"></textarea>
+    <div class="btn-row">
+      <button class="btn btn-danger" id="btnDeleteRecord">Delete</button>
+      <button class="btn btn-ghost" id="btnCancelEdit">Cancel</button>
+      <button class="btn btn-primary" id="btnSaveEdit" style="flex:2;">Save changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- Printable deposit summary -->
+<div id="printArea"></div>
+
+<script>
+(function(){
+"use strict";
+
+var DENOMS   = [100,50,20,10,5,2,1,0.5,0.2,0.1,0.05];
+var IS_NOTE  = [true,true,true,true,true,false,false,false,false,false,false];
+
+/* ============================================================
+   FIREBASE SETUP — fill this in with your own project's values.
+   Firebase console → Project settings → General → Your apps →
+   SDK setup and configuration. This is safe to make public;
+   the Firestore security rules (not this object) control access.
+   ============================================================ */
+var FIREBASE_CONFIG = {
+  apiKey: "AIzaSyCcyHro3_N32LpHgXQfJ8PjCtwkdLI4r3c",
+  authDomain: "mptc-cc.firebaseapp.com",
+  projectId: "mptc-cc",
+  storageBucket: "mptc-cc.firebasestorage.app",
+  messagingSenderId: "274858320128",
+  appId: "1:274858320128:web:7d187dc4e720574f24d3e5"
+};
+
+var money = new Intl.NumberFormat("en-AU",{style:"currency",currency:"AUD"});
+function fmt(n){ return money.format(Math.round((n+Number.EPSILON)*100)/100); }
+function todayStr(){
+  var d = new Date();
+  var m = String(d.getMonth()+1).padStart(2,"0");
+  var day = String(d.getDate()).padStart(2,"0");
+  return d.getFullYear()+"-"+m+"-"+day;
+}
+function fmtDateNice(iso){
+  if(!iso) return "—";
+  var parts = iso.split("-");
+  var d = new Date(parseInt(parts[0]),parseInt(parts[1])-1,parseInt(parts[2]));
+  return d.toLocaleDateString("en-AU",{weekday:"short",day:"numeric",month:"short",year:"numeric"});
+}
+
+/* ---------- shared data (Firestore) ---------- */
+var state = {
+  records: [],
+  sessions: ["AM","PM","NIGHT","NA","Unknown"],
+  types: ["Tennis","PB","Membership","Xmas BBQ"],
+  sessionRequiredTypes: ["Tennis","PB"]
+};
+
+/* ---------- per-device preferences (localStorage only) ---------- */
+var PREFS_KEY = "mptc_prefs_v1";
+function loadPrefs(){
+  try{
+    var raw = localStorage.getItem(PREFS_KEY);
+    if(raw) return JSON.parse(raw);
+  }catch(e){}
+  return { collectionDate: todayStr(), hideHelp: false };
+}
+var prefs = loadPrefs();
+function savePrefs(){ localStorage.setItem(PREFS_KEY, JSON.stringify(prefs)); }
+
+function actualOf(rec){
+  var t = 0;
+  for(var i=0;i<DENOMS.length;i++){ t += (rec.denoms[i]||0) * DENOMS[i]; }
+  return t;
+}
+
+/* ---------- Firebase connection + live sync ---------- */
+var db = null, envelopesCol = null, settingsDocRef = null, firebaseReady = false;
+
+function isConfigured(){
+  return FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.apiKey.indexOf("PASTE_")!==0;
+}
+function setStatus(text, isErr){
+  var el = document.getElementById("firebaseStatus");
+  el.textContent = text;
+  el.className = isErr ? "err" : "";
+}
+function showSetupNotice(html){
+  document.getElementById("main-content").style.display = "none";
+  document.querySelector("nav.bottom").style.display = "none";
+  var n = document.getElementById("setupNotice");
+  n.style.display = "block";
+  n.innerHTML = html;
+}
+
+function initFirebase(){
+  if(!isConfigured()){
+    setStatus("Firebase not set up yet", true);
+    showSetupNotice(
+      "<h2 style=\"margin-top:0;\">One-time setup needed</h2>"+
+      "<p>This copy of the app hasn't been connected to a shared database yet. Open the HTML file, find the <code>FIREBASE_CONFIG</code> object near the top of the script, and fill it in with the values from your Firebase project (Project settings \u2192 General \u2192 Your apps \u2192 SDK setup and configuration).</p>"+
+      "<p>Once that's filled in and re-uploaded, reload this page \u2014 it will connect automatically.</p>"
+    );
+    return;
+  }
+  try{
+    firebase.initializeApp(FIREBASE_CONFIG);
+  }catch(e){
+    setStatus("Couldn't start Firebase: "+e.message, true);
+    return;
+  }
+  db = firebase.firestore();
+  envelopesCol = db.collection("envelopes");
+  settingsDocRef = db.collection("settings").doc("config");
+
+  try{ db.enablePersistence({synchronizeTabs:true}).catch(function(){}); }catch(e){}
+
+  firebase.auth().onAuthStateChanged(function(user){
+    if(user){
+      firebaseReady = true;
+      setStatus("Connected \u2014 live with the committee");
+      attachListeners();
+    }
+  });
+  firebase.auth().signInAnonymously().catch(function(err){
+    setStatus("Couldn't connect: "+err.message, true);
+  });
+
+  window.addEventListener("online", function(){ if(firebaseReady) setStatus("Connected \u2014 live with the committee"); });
+  window.addEventListener("offline", function(){ setStatus("Offline \u2014 changes will sync when back online", true); });
+}
+
+function attachListeners(){
+  settingsDocRef.onSnapshot(function(doc){
+    if(doc.exists){
+      var d = doc.data();
+      if(d.sessions) state.sessions = d.sessions;
+      if(d.types) state.types = d.types;
+      if(d.sessionRequiredTypes) state.sessionRequiredTypes = d.sessionRequiredTypes;
+    } else {
+      settingsDocRef.set({ sessions: state.sessions, types: state.types, sessionRequiredTypes: state.sessionRequiredTypes });
+    }
+    renderActive();
+  }, function(err){ setStatus("Settings sync error: "+err.message, true); });
+
+  envelopesCol.onSnapshot(function(snap){
+    state.records = snap.docs.map(function(d){ var data = d.data(); data.id = d.id; return data; });
+    renderActive();
+  }, function(err){ setStatus("Data sync error: "+err.message, true); });
+}
+
+function runBatchOps(ops){
+  var CHUNK = 400;
+  var chain = Promise.resolve();
+  for(var i=0;i<ops.length;i+=CHUNK){
+    (function(slice){
+      chain = chain.then(function(){
+        var batch = db.batch();
+        slice.forEach(function(op){
+          if(op.type==="delete") batch.delete(op.ref);
+          else batch.set(envelopesCol.doc(), op.data);
+        });
+        return batch.commit();
+      });
+    })(ops.slice(i, i+CHUNK));
+  }
+  return chain;
+}
+
+function renderActive(){
+  var activeEl = document.querySelector(".view.active");
+  if(!activeEl) return;
+  var name = activeEl.id.replace("view-","");
+  if(name==="count") renderEnvList();
+  if(name==="summary"){ populateSummaryDates(); renderSummaryContent(); }
+  if(name==="records") renderRecords();
+  if(name==="setup") renderSetup();
+}
+
+/* ---------- view switching ---------- */
+var views = ["count","summary","records","setup"];
+function showView(name){
+  views.forEach(function(v){
+    document.getElementById("view-"+v).classList.toggle("active", v===name);
+  });
+  document.querySelectorAll("nav.bottom button").forEach(function(b){
+    b.classList.toggle("active", b.dataset.view===name);
+  });
+  if(name==="summary") renderSummary();
+  if(name==="records") renderRecords();
+  if(name==="setup") renderSetup();
+  window.scrollTo(0,0);
+}
+document.querySelectorAll("nav.bottom button").forEach(function(b){
+  b.addEventListener("click", function(){ showView(b.dataset.view); });
+});
+
+/* ---------- toast ---------- */
+var toastTimer;
+function toast(msg){
+  var t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ t.classList.remove("show"); }, 2200);
+}
+
+/* ---------- select population ---------- */
+function fillSelect(sel, options, selected){
+  sel.innerHTML = "";
+  options.forEach(function(o){
+    var op = document.createElement("option");
+    op.value = o; op.textContent = o;
+    if(o===selected) op.selected = true;
+    sel.appendChild(op);
+  });
+}
+
+/* ---------- denomination grid builders ---------- */
+function denomLabel(v){
+  return v>=1 ? "$"+v : (v*100).toFixed(0)+"c";
+}
+function buildDenomGrids(notesGridEl, coinsGridEl, values, onChange){
+  notesGridEl.innerHTML=""; coinsGridEl.innerHTML="";
+  DENOMS.forEach(function(d,i){
+    var cell = document.createElement("div");
+    cell.className = "denom-cell";
+    cell.innerHTML =
+      '<span class="lbl">'+denomLabel(d)+'</span>'+
+      '<input type="number" min="0" step="1" inputmode="numeric" data-i="'+i+'" value="'+(values[i]||0)+'">'+
+      '<span class="sub" data-sub="'+i+'">'+fmt((values[i]||0)*d)+'</span>';
+    (IS_NOTE[i]?notesGridEl:coinsGridEl).appendChild(cell);
+    cell.querySelector("input").addEventListener("input", function(e){
+      var v = parseInt(e.target.value,10); if(isNaN(v)||v<0) v=0;
+      values[i]=v;
+      cell.querySelector(".sub").textContent = fmt(v*d);
+      onChange();
+    });
+  });
+}
+
+/* ================== COUNT VIEW ================== */
+var envValues = new Array(DENOMS.length).fill(0);
+
+function updateCompare(){
+  var actual = 0;
+  for(var i=0;i<DENOMS.length;i++) actual += envValues[i]*DENOMS[i];
+  var expRaw = document.getElementById("envExpected").value;
+  var box = document.getElementById("compareBox");
+  document.getElementById("cmpActual").textContent = fmt(actual);
+  if(expRaw===""){
+    document.getElementById("cmpExpected").textContent = "—";
+    document.getElementById("cmpTag").textContent = "";
+    box.className = "compare neutral";
+  } else {
+    var exp = parseFloat(expRaw); if(isNaN(exp)) exp=0;
+    document.getElementById("cmpExpected").textContent = fmt(exp);
+    var diff = Math.round((actual-exp)*100)/100;
+    if(diff===0){
+      document.getElementById("cmpTag").textContent = "Matches ✓";
+      box.className = "compare ok";
+    } else {
+      document.getElementById("cmpTag").textContent = (diff>0?"+":"")+fmt(diff)+" vs envelope";
+      box.className = "compare warn";
+    }
+  }
+  return actual;
+}
+
+function fillSelectWithPlaceholder(sel, options, placeholder){
+  sel.innerHTML = "";
+  var ph = document.createElement("option");
+  ph.value = ""; ph.textContent = placeholder; ph.disabled = true; ph.selected = true;
+  sel.appendChild(ph);
+  options.forEach(function(o){
+    var op = document.createElement("option");
+    op.value = o; op.textContent = o;
+    sel.appendChild(op);
+  });
+}
+
+function typeNeedsSession(type){
+  return state.sessionRequiredTypes.indexOf(type) !== -1;
+}
+
+function updateSessionFieldVisibility(typeSelId, fieldId, sessionSelId){
+  var type = document.getElementById(typeSelId).value;
+  var field = document.getElementById(fieldId);
+  var needsSession = type && typeNeedsSession(type);
+  field.style.display = needsSession ? "" : "none";
+}
+
+function resetEnvelopeForm(){
+  envValues = new Array(DENOMS.length).fill(0);
+  buildDenomGrids(document.getElementById("notesGrid"), document.getElementById("coinsGrid"), envValues, updateCompare);
+  document.getElementById("envSessionDate").value = "";
+  document.getElementById("envExpected").value = "";
+  document.getElementById("envComment").value = "";
+  fillSelectWithPlaceholder(document.getElementById("envSession"), state.sessions, "Select session...");
+  fillSelectWithPlaceholder(document.getElementById("envType"), state.types, "Select activity...");
+  updateSessionFieldVisibility("envType","envSessionField","envSession");
+  updateCompare();
+}
+
+function renderEnvList(){
+  var cd = document.getElementById("countDate").value;
+  var list = state.records.filter(function(r){ return r.collectionDate===cd; });
+  var wrap = document.getElementById("envList");
+  var hint = document.getElementById("envListHint");
+  wrap.innerHTML = "";
+  if(list.length===0){
+    hint.style.display="block";
+    hint.textContent = "None yet — save your first envelope above.";
+    return;
+  }
+  hint.style.display="none";
+  list.sort(function(a,b){ return (a.sessionDate||"").localeCompare(b.sessionDate||""); });
+  list.forEach(function(r){
+    var actual = actualOf(r);
+    var dotClass = "na";
+    if(r.expected!==null && r.expected!==undefined){
+      dotClass = Math.round((actual-r.expected)*100)===0 ? "ok" : "warn";
+    }
+    var el = document.createElement("div");
+    el.className = "env-item";
+    el.innerHTML =
+      '<span class="dot '+dotClass+'"></span>'+
+      '<span class="meta"><span class="t1">'+fmtDateNice(r.sessionDate)+' · '+r.type+' · '+r.session+'</span>'+
+      (r.comment?'<span class="t2">'+escapeHtml(r.comment)+'</span>':'')+'</span>'+
+      '<span class="amt">'+fmt(actual)+'</span><span class="chev">›</span>';
+    el.addEventListener("click", function(){ openEdit(r.id); });
+    wrap.appendChild(el);
+  });
+}
+
+function escapeHtml(s){
+  var d = document.createElement("div"); d.textContent = s; return d.innerHTML;
+}
+
+document.getElementById("envExpected").addEventListener("input", updateCompare);
+document.getElementById("envType").addEventListener("change", function(){
+  updateSessionFieldVisibility("envType","envSessionField","envSession");
+});
+
+document.getElementById("countDate").addEventListener("change", function(e){
+  prefs.collectionDate = e.target.value;
+  savePrefs();
+  renderEnvList();
+});
+
+document.getElementById("btnClearEnvelope").addEventListener("click", function(){
+  resetEnvelopeForm();
+});
+
+document.getElementById("btnSaveEnvelope").addEventListener("click", function(){
+  var cd = document.getElementById("countDate").value || todayStr();
+  var sessionDateEl = document.getElementById("envSessionDate");
+  var sessionEl = document.getElementById("envSession");
+  var typeEl = document.getElementById("envType");
+  var sessionDate = sessionDateEl.value;
+  var session = sessionEl.value;
+  var type = typeEl.value;
+
+  if(!sessionDate){ alert("Enter the date written on the envelope."); sessionDateEl.focus(); return; }
+  if(!type){ alert("Select the activity from the envelope."); typeEl.focus(); return; }
+  if(typeNeedsSession(type) && !session){ alert("Select the session (AM / PM / Night) from the envelope."); sessionEl.focus(); return; }
+  if(!typeNeedsSession(type)){ session = (state.sessions.indexOf("NA")!==-1) ? "NA" : session; }
+
+  var expRaw = document.getElementById("envExpected").value;
+  var expected = expRaw==="" ? null : (parseFloat(expRaw)||0);
+  var comment = document.getElementById("envComment").value.trim();
+  var actual = envValues.reduce(function(s,c,i){ return s+c*DENOMS[i]; },0);
+
+  if(actual===0 && (expected===null || expected===0)){
+    if(!confirm("Nothing counted for this envelope — save it anyway?")) return;
+  }
+
+  var rec = {
+    collectionDate: cd,
+    sessionDate: sessionDate,
+    session: session,
+    type: type,
+    expected: expected,
+    denoms: envValues.slice(),
+    comment: comment
+  };
+  prefs.collectionDate = cd;
+  savePrefs();
+  envelopesCol.add(rec).then(function(){
+    toast("Envelope saved — "+fmt(actual));
+  }).catch(function(err){
+    alert("Couldn't save to the shared database: "+err.message);
+  });
+  resetEnvelopeForm();
+});
+
+document.getElementById("btnGoSummary").addEventListener("click", function(){
+  document.getElementById("summaryDate").value = document.getElementById("countDate").value;
+  showView("summary");
+});
+
+document.getElementById("hideHelp").addEventListener("click", function(){
+  prefs.hideHelp = true; savePrefs();
+  document.getElementById("helpbox").style.display = "none";
+});
+
+function initCountView(){
+  document.getElementById("countDate").value = prefs.collectionDate || todayStr();
+  if(prefs.hideHelp) document.getElementById("helpbox").style.display = "none";
+  resetEnvelopeForm();
+  renderEnvList();
+}
+
+/* ================== SUMMARY VIEW ================== */
+function uniqueCollectionDates(){
+  var set = {};
+  state.records.forEach(function(r){ set[r.collectionDate]=true; });
+  return Object.keys(set).sort().reverse();
+}
+
+function populateSummaryDates(){
+  var sel = document.getElementById("summaryDate");
+  var dates = uniqueCollectionDates();
+  var current = sel.value;
+  sel.innerHTML = "";
+  if(dates.length===0){
+    var op = document.createElement("option");
+    op.textContent = "No collections recorded yet"; op.value="";
+    sel.appendChild(op);
+    return;
+  }
+  dates.forEach(function(d){
+    var op = document.createElement("option");
+    op.value = d; op.textContent = fmtDateNice(d);
+    sel.appendChild(op);
+  });
+  sel.value = dates.indexOf(current)>=0 ? current : dates[0];
+}
+
+document.getElementById("summaryDate").addEventListener("change", renderSummaryContent);
+
+function renderSummary(){
+  populateSummaryDates();
+  renderSummaryContent();
+}
+
+function renderSummaryContent(){
+  var date = document.getElementById("summaryDate").value;
+  var el = document.getElementById("summaryContent");
+  if(!date){
+    el.innerHTML = '<div class="card"><p class="empty">No collections recorded for any date yet. Head to <b>Count</b> to enter your first envelope.</p></div>';
+    document.getElementById("printArea").innerHTML = "";
+    return;
+  }
+  var recs = state.records.filter(function(r){ return r.collectionDate===date; });
+  var denomTotals = new Array(DENOMS.length).fill(0);
+  var byType = {}, bySession = {};
+  var grand = 0, expectedTotal = 0, expectedCount = 0, mismatches = 0;
+
+  recs.forEach(function(r){
+    for(var i=0;i<DENOMS.length;i++) denomTotals[i] += (r.denoms[i]||0);
+    var a = actualOf(r);
+    grand += a;
+    byType[r.type] = (byType[r.type]||0) + a;
+    bySession[r.session] = (bySession[r.session]||0) + a;
+    if(r.expected!==null && r.expected!==undefined){
+      expectedTotal += r.expected; expectedCount++;
+      if(Math.round((a-r.expected)*100)!==0) mismatches++;
+    }
+  });
+
+  function denomRows(isNote){
+    var rows = "";
+    DENOMS.forEach(function(d,i){
+      if(IS_NOTE[i]!==isNote) return;
+      var count = denomTotals[i];
+      var sub = count*d;
+      rows += '<tr><td>'+denomLabel(d)+'</td><td class="num">'+count+'</td><td class="num">'+fmt(sub)+'</td></tr>';
+    });
+    return rows;
+  }
+  var notesSum = 0, coinsSum = 0;
+  DENOMS.forEach(function(d,i){ if(IS_NOTE[i]) notesSum += denomTotals[i]*d; else coinsSum += denomTotals[i]*d; });
+
+  function tableRows(obj){
+    return Object.keys(obj).sort().map(function(k){
+      return '<tr><td>'+k+'</td><td class="num">'+fmt(obj[k])+'</td></tr>';
+    }).join("");
+  }
+
+  var mismatchAlert = "";
+  if(mismatches>0){
+    mismatchAlert = '<div class="alert warn">'+mismatches+' envelope'+(mismatches>1?"s":"")+" on this date didn't match the amount written on the front. Check the Count tab to review.</div>";
+  } else if(expectedCount>0){
+    mismatchAlert = '<div class="alert ok">All '+expectedCount+' envelope'+(expectedCount>1?"s":"")+' with an amount written on the front matched what was counted.</div>';
+  }
+
+  var html =
+    '<div class="card">'+
+      '<h2>'+fmtDateNice(date)+'</h2>'+
+      '<div class="grand"><div class="lbl">Total to deposit</div><div class="val">'+fmt(grand)+'</div></div>'+
+      (expectedCount>0 ? '<p class="hint" style="text-align:center;">Envelopes expected '+fmt(expectedTotal)+' across '+recs.length+' envelope'+(recs.length>1?"s":"")+'.</p>' : '<p class="hint" style="text-align:center;">'+recs.length+' envelope'+(recs.length>1?"s":"")+' counted.</p>')+
+      mismatchAlert+
+    '</div>'+
+    '<div class="card">'+
+      '<h2>By activity</h2>'+
+      '<table class="summary-table"><thead><tr><th>Activity</th><th class="num">Amount</th></tr></thead><tbody>'+
+      tableRows(byType)+
+      '<tr class="total-row"><td>Total</td><td class="num">'+fmt(grand)+'</td></tr>'+
+      '</tbody></table>'+
+    '</div>'+
+    '<div class="card">'+
+      '<h2>By session</h2>'+
+      '<table class="summary-table"><thead><tr><th>Session</th><th class="num">Amount</th></tr></thead><tbody>'+
+      tableRows(bySession)+
+      '<tr class="total-row"><td>Total</td><td class="num">'+fmt(grand)+'</td></tr>'+
+      '</tbody></table>'+
+    '</div>'+
+    '<div class="card">'+
+      '<h2>Notes &amp; coins to bag up</h2>'+
+      '<table class="summary-table"><thead><tr><th>Denomination</th><th class="num">Count</th><th class="num">Amount</th></tr></thead><tbody>'+
+      denomRows(true)+
+      '<tr class="total-row"><td colspan="2">Notes total</td><td class="num">'+fmt(notesSum)+'</td></tr>'+
+      denomRows(false)+
+      '<tr class="total-row"><td colspan="2">Coins total</td><td class="num">'+fmt(coinsSum)+'</td></tr>'+
+      '<tr class="total-row"><td colspan="2">Grand total</td><td class="num">'+fmt(grand)+'</td></tr>'+
+      '</tbody></table>'+
+      '<button class="btn btn-secondary btn-block no-print" id="btnPrint">Print this summary</button>'+
+    '</div>';
+
+  el.innerHTML = html;
+  document.getElementById("btnPrint").addEventListener("click", function(){
+    buildPrintArea(date, recs, denomTotals, notesSum, coinsSum, grand, byType, bySession, expectedTotal, expectedCount, mismatches);
+    window.print();
+  });
+}
+
+function buildPrintArea(date, recs, denomTotals, notesSum, coinsSum, grand, byType, bySession, expectedTotal, expectedCount, mismatches){
+  function denomRows(isNote){
+    var rows = "";
+    DENOMS.forEach(function(d,i){
+      if(IS_NOTE[i]!==isNote) return;
+      rows += '<tr><td>'+denomLabel(d)+'</td><td style="text-align:right;">'+denomTotals[i]+'</td><td style="text-align:right;">'+fmt(denomTotals[i]*d)+'</td></tr>';
+    });
+    return rows;
+  }
+  function tableRows(obj){
+    return Object.keys(obj).sort().map(function(k){
+      return '<tr><td>'+k+'</td><td style="text-align:right;">'+fmt(obj[k])+'</td></tr>';
+    }).join("");
+  }
+  var html =
+    '<div style="font-family:Georgia,serif;padding:20px;color:#152018;">'+
+    '<h1 style="margin:0 0 2px;">Myall Park Tennis Club</h1>'+
+    '<p style="margin:0 0 18px;color:#555;">Bank deposit summary — '+fmtDateNice(date)+'</p>'+
+    '<h2 style="font-size:1.6rem;margin:0 0 16px;">Total to deposit: '+fmt(grand)+'</h2>'+
+    '<table style="width:100%;border-collapse:collapse;margin-bottom:16px;" cellpadding="4">'+
+      '<tr><th style="text-align:left;border-bottom:1px solid #999;">Denomination</th><th style="text-align:right;border-bottom:1px solid #999;">Count</th><th style="text-align:right;border-bottom:1px solid #999;">Amount</th></tr>'+
+      denomRows(true)+
+      '<tr><td colspan="2" style="font-weight:700;border-top:1px solid #999;">Notes total</td><td style="text-align:right;font-weight:700;border-top:1px solid #999;">'+fmt(notesSum)+'</td></tr>'+
+      denomRows(false)+
+      '<tr><td colspan="2" style="font-weight:700;border-top:1px solid #999;">Coins total</td><td style="text-align:right;font-weight:700;border-top:1px solid #999;">'+fmt(coinsSum)+'</td></tr>'+
+      '<tr><td colspan="2" style="font-weight:700;border-top:2px solid #152018;">Grand total</td><td style="text-align:right;font-weight:700;border-top:2px solid #152018;">'+fmt(grand)+'</td></tr>'+
+    '</table>'+
+    '<table style="width:48%;float:left;border-collapse:collapse;" cellpadding="4">'+
+      '<tr><th style="text-align:left;border-bottom:1px solid #999;">By activity</th><th style="text-align:right;border-bottom:1px solid #999;"></th></tr>'+
+      tableRows(byType)+
+    '</table>'+
+    '<table style="width:48%;float:right;border-collapse:collapse;" cellpadding="4">'+
+      '<tr><th style="text-align:left;border-bottom:1px solid #999;">By session</th><th style="text-align:right;border-bottom:1px solid #999;"></th></tr>'+
+      tableRows(bySession)+
+    '</table>'+
+    '<div style="clear:both;"></div>'+
+    (expectedCount>0 ? '<p style="margin-top:20px;">Envelopes expected '+fmt(expectedTotal)+' across '+recs.length+' envelope(s); '+mismatches+' did not match.</p>' : '')+
+    '<p style="margin-top:30px;color:#555;">Counted and printed '+new Date().toLocaleString("en-AU")+'</p>'+
+    '<p style="margin-top:40px;">Prepared by: ______________________&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Checked by: ______________________</p>'+
+    '</div>';
+  document.getElementById("printArea").innerHTML = html;
+}
+
+/* ================== RECORDS VIEW ================== */
+function populateFilters(){
+  var dSel = document.getElementById("filterDate");
+  var tSel = document.getElementById("filterType");
+  var curD = dSel.value, curT = tSel.value;
+  dSel.innerHTML = '<option value="">All dates</option>';
+  uniqueCollectionDates().forEach(function(d){
+    var op = document.createElement("option"); op.value=d; op.textContent=fmtDateNice(d);
+    dSel.appendChild(op);
+  });
+  dSel.value = curD;
+  tSel.innerHTML = '<option value="">All activities</option>';
+  state.types.forEach(function(t){
+    var op = document.createElement("option"); op.value=t; op.textContent=t;
+    tSel.appendChild(op);
+  });
+  tSel.value = curT;
+}
+document.getElementById("filterDate").addEventListener("change", renderRecords);
+document.getElementById("filterType").addEventListener("change", renderRecords);
+document.getElementById("searchText").addEventListener("input", renderRecords);
+
+function renderRecords(){
+  populateFilters();
+  var fd = document.getElementById("filterDate").value;
+  var ft = document.getElementById("filterType").value;
+  var q = document.getElementById("searchText").value.trim().toLowerCase();
+  var list = state.records.filter(function(r){
+    if(fd && r.collectionDate!==fd) return false;
+    if(ft && r.type!==ft) return false;
+    if(q && !(r.comment||"").toLowerCase().includes(q)) return false;
+    return true;
+  });
+  list.sort(function(a,b){
+    if(a.collectionDate!==b.collectionDate) return b.collectionDate.localeCompare(a.collectionDate);
+    return (b.sessionDate||"").localeCompare(a.sessionDate||"");
+  });
+
+  var total = 0;
+  list.forEach(function(r){ total += actualOf(r); });
+  document.getElementById("recordsTotalValue").textContent = fmt(total);
+  document.getElementById("recordsTotalLabel").textContent =
+    "Total collected — "+list.length+" envelope"+(list.length===1?"":"s")+(fd||ft||q ? " (filtered)" : "");
+
+  var wrap = document.getElementById("recList");
+  wrap.innerHTML = "";
+  if(list.length===0){
+    wrap.innerHTML = '<p class="empty">No records match.</p>';
+    return;
+  }
+  var MAX = 150;
+  list.slice(0,MAX).forEach(function(r){
+    var el = document.createElement("div");
+    el.className = "rec-row";
+    el.innerHTML =
+      '<span class="meta"><span class="t1">'+fmtDateNice(r.collectionDate)+' · '+r.type+' · '+r.session+'</span>'+
+      '<span class="t2">Envelope date: '+fmtDateNice(r.sessionDate)+(r.comment?" — "+escapeHtml(r.comment):"")+'</span></span>'+
+      '<span class="amt">'+fmt(actualOf(r))+'</span>';
+    el.addEventListener("click", function(){ openEdit(r.id); });
+    wrap.appendChild(el);
+  });
+  if(list.length>MAX){
+    var more = document.createElement("p");
+    more.className = "hint";
+    more.style.textAlign="center";
+    more.textContent = "Showing first "+MAX+" of "+list.length+" — narrow your search to see more.";
+    wrap.appendChild(more);
+  }
+}
+
+/* ---------- CSV / JSON export ---------- */
+function download(filename, text, mime){
+  var blob = new Blob([text], {type: mime||"text/plain"});
+  var a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(a.href);
+}
+
+function toCsv(){
+  var header = ["Collection Date","Envelope Date","Session","Activity","Expected","Actual"];
+  DENOMS.forEach(function(d){ header.push(denomLabel(d)); });
+  header.push("Comment");
+  var rows = [header.join(",")];
+  state.records.slice().sort(function(a,b){ return a.collectionDate.localeCompare(b.collectionDate); })
+    .forEach(function(r){
+      var row = [r.collectionDate, r.sessionDate, r.session, r.type,
+        r.expected===null||r.expected===undefined?"":r.expected.toFixed(2),
+        actualOf(r).toFixed(2)];
+      DENOMS.forEach(function(d,i){ row.push(r.denoms[i]||0); });
+      row.push('"'+(r.comment||"").replace(/"/g,'""')+'"');
+      rows.push(row.join(","));
+    });
+  return rows.join("\n");
+}
+
+document.getElementById("btnExportCsv").addEventListener("click", function(){
+  download("cash-collections-"+todayStr()+".csv", toCsv(), "text/csv");
+  toast("CSV downloaded");
+});
+function exportJson(){
+  var backup = { records: state.records, sessions: state.sessions, types: state.types, sessionRequiredTypes: state.sessionRequiredTypes };
+  download("cash-collections-backup-"+todayStr()+".json", JSON.stringify(backup,null,2), "application/json");
+  toast("Backup downloaded");
+}
+document.getElementById("btnExportJson").addEventListener("click", exportJson);
+document.getElementById("btnExportJson2").addEventListener("click", exportJson);
+
+document.getElementById("btnImportJson").addEventListener("click", function(){
+  document.getElementById("fileImport").click();
+});
+document.getElementById("fileImport").addEventListener("change", function(e){
+  var file = e.target.files[0];
+  if(!file) return;
+  var reader = new FileReader();
+  reader.onload = function(evt){
+    try{
+      var data = JSON.parse(evt.target.result);
+      if(!data.records || !Array.isArray(data.records)) throw new Error("Not a recognised backup file.");
+      if(!confirm("This will replace everything in the SHARED database with this backup file, for the whole committee. Continue?")) return;
+      toast("Restoring backup...");
+      envelopesCol.get().then(function(snap){
+        var ops = snap.docs.map(function(d){ return {type:"delete", ref:d.ref}; });
+        data.records.forEach(function(r){
+          ops.push({type:"add", data:{
+            collectionDate: r.collectionDate,
+            sessionDate: r.sessionDate,
+            session: r.session,
+            type: r.type,
+            expected: (r.expected===undefined?null:r.expected),
+            denoms: r.denoms,
+            comment: r.comment||""
+          }});
+        });
+        return runBatchOps(ops);
+      }).then(function(){
+        var settingsPatch = {};
+        if(data.sessions) settingsPatch.sessions = data.sessions;
+        if(data.types) settingsPatch.types = data.types;
+        if(data.sessionRequiredTypes) settingsPatch.sessionRequiredTypes = data.sessionRequiredTypes;
+        return settingsDocRef.set(settingsPatch, {merge:true});
+      }).then(function(){
+        toast("Backup restored for everyone");
+      }).catch(function(err){
+        alert("Restore failed partway through: "+err.message);
+      });
+    }catch(err){
+      alert("Couldn't read that file: "+err.message);
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = "";
+});
+
+document.getElementById("btnClearAll").addEventListener("click", function(){
+  if(!confirm("Delete ALL records from the SHARED database, for the whole committee? This cannot be undone.")) return;
+  if(!confirm("Really sure? Consider downloading a backup first.")) return;
+  envelopesCol.get().then(function(snap){
+    var ops = snap.docs.map(function(d){ return {type:"delete", ref:d.ref}; });
+    return runBatchOps(ops);
+  }).then(function(){
+    toast("All data deleted");
+  }).catch(function(err){
+    alert("Couldn't delete everything: "+err.message);
+  });
+});
+
+/* ================== SETUP VIEW ================== */
+function renderChips(containerId, list, onRemove){
+  var el = document.getElementById(containerId);
+  el.innerHTML = "";
+  list.forEach(function(item){
+    var chip = document.createElement("span");
+    chip.className = "chip";
+    chip.innerHTML = '<span>'+escapeHtml(item)+'</span>';
+    var btn = document.createElement("button");
+    btn.textContent = "×";
+    btn.title = "Remove";
+    btn.addEventListener("click", function(){ onRemove(item); });
+    chip.appendChild(btn);
+    el.appendChild(chip);
+  });
+}
+function renderSetup(){
+  renderChips("sessionChips", state.sessions, function(item){
+    if(state.sessions.length<=1){ alert("Keep at least one session option."); return; }
+    if(!confirm('Remove "'+item+'" from the session list? Existing records keep it, but it won\'t be offered for new entries.')) return;
+    var updated = state.sessions.filter(function(s){ return s!==item; });
+    settingsDocRef.set({sessions: updated}, {merge:true}).catch(function(err){ alert("Couldn't save: "+err.message); });
+  });
+  renderChips("typeChips", state.types, function(item){
+    if(state.types.length<=1){ alert("Keep at least one activity option."); return; }
+    if(!confirm('Remove "'+item+'" from the activity list? Existing records keep it, but it won\'t be offered for new entries.')) return;
+    var updatedTypes = state.types.filter(function(t){ return t!==item; });
+    var updatedReq = state.sessionRequiredTypes.filter(function(t){ return t!==item; });
+    settingsDocRef.set({types: updatedTypes, sessionRequiredTypes: updatedReq}, {merge:true}).catch(function(err){ alert("Couldn't save: "+err.message); });
+  });
+  renderSessionToggles();
+}
+function renderSessionToggles(){
+  var el = document.getElementById("typeSessionToggles");
+  el.innerHTML = "";
+  state.types.forEach(function(t){
+    var row = document.createElement("label");
+    row.className = "toggle-row";
+    var cb = document.createElement("input");
+    cb.type = "checkbox";
+    cb.checked = typeNeedsSession(t);
+    cb.addEventListener("change", function(){
+      var updated;
+      if(cb.checked){
+        updated = state.sessionRequiredTypes.indexOf(t)===-1 ? state.sessionRequiredTypes.concat([t]) : state.sessionRequiredTypes;
+      } else {
+        updated = state.sessionRequiredTypes.filter(function(x){ return x!==t; });
+      }
+      settingsDocRef.set({sessionRequiredTypes: updated}, {merge:true}).catch(function(err){
+        alert("Couldn't save: "+err.message);
+        cb.checked = !cb.checked;
+      });
+    });
+    row.appendChild(cb);
+    var span = document.createElement("span");
+    span.textContent = t;
+    row.appendChild(span);
+    el.appendChild(row);
+  });
+}
+document.getElementById("btnAddSession").addEventListener("click", function(){
+  var input = document.getElementById("newSession");
+  var v = input.value.trim();
+  if(!v) return;
+  input.value = "";
+  if(state.sessions.indexOf(v)===-1){
+    settingsDocRef.set({sessions: state.sessions.concat([v])}, {merge:true}).catch(function(err){ alert("Couldn't save: "+err.message); });
+  }
+});
+document.getElementById("btnAddType").addEventListener("click", function(){
+  var input = document.getElementById("newType");
+  var v = input.value.trim();
+  if(!v) return;
+  input.value = "";
+  if(state.types.indexOf(v)===-1){
+    settingsDocRef.set({types: state.types.concat([v])}, {merge:true}).catch(function(err){ alert("Couldn't save: "+err.message); });
+  }
+});
+
+/* ================== EDIT MODAL ================== */
+var editValues = new Array(DENOMS.length).fill(0);
+var editingId = null;
+
+function updateEditCompare(){
+  var actual = 0;
+  for(var i=0;i<DENOMS.length;i++) actual += editValues[i]*DENOMS[i];
+  var expRaw = document.getElementById("editExpected").value;
+  var box = document.getElementById("editCompareBox");
+  document.getElementById("editCmpActual").textContent = fmt(actual);
+  if(expRaw===""){
+    document.getElementById("editCmpExpected").textContent = "—";
+    document.getElementById("editCmpTag").textContent = "";
+    box.className = "compare neutral";
+  } else {
+    var exp = parseFloat(expRaw); if(isNaN(exp)) exp=0;
+    document.getElementById("editCmpExpected").textContent = fmt(exp);
+    var diff = Math.round((actual-exp)*100)/100;
+    if(diff===0){
+      document.getElementById("editCmpTag").textContent = "Matches ✓";
+      box.className = "compare ok";
+    } else {
+      document.getElementById("editCmpTag").textContent = (diff>0?"+":"")+fmt(diff)+" vs envelope";
+      box.className = "compare warn";
+    }
+  }
+}
+
+function openEdit(id){
+  var r = state.records.find(function(x){ return x.id===id; });
+  if(!r) return;
+  editingId = id;
+  document.getElementById("editCollectionDate").value = r.collectionDate;
+  document.getElementById("editSessionDate").value = r.sessionDate;
+  fillSelect(document.getElementById("editSession"), state.sessions.indexOf(r.session)>=0?state.sessions:state.sessions.concat([r.session]), r.session);
+  fillSelect(document.getElementById("editType"), state.types.indexOf(r.type)>=0?state.types:state.types.concat([r.type]), r.type);
+  document.getElementById("editExpected").value = (r.expected===null||r.expected===undefined) ? "" : r.expected;
+  document.getElementById("editComment").value = r.comment || "";
+  editValues = r.denoms.slice();
+  buildDenomGrids(document.getElementById("editNotesGrid"), document.getElementById("editCoinsGrid"), editValues, updateEditCompare);
+  updateEditCompare();
+  document.getElementById("editSessionField").style.display = typeNeedsSession(r.type) ? "" : "none";
+  document.getElementById("editModal").classList.remove("hidden");
+}
+function closeEdit(){
+  document.getElementById("editModal").classList.add("hidden");
+  editingId = null;
+}
+document.getElementById("editType").addEventListener("change", function(e){
+  document.getElementById("editSessionField").style.display = typeNeedsSession(e.target.value) ? "" : "none";
+});
+document.getElementById("btnCancelEdit").addEventListener("click", closeEdit);
+document.getElementById("editModal").addEventListener("click", function(e){
+  if(e.target.id==="editModal") closeEdit();
+});
+document.getElementById("editExpected").addEventListener("input", updateEditCompare);
+
+document.getElementById("btnSaveEdit").addEventListener("click", function(){
+  var id = editingId;
+  var expRaw = document.getElementById("editExpected").value;
+  var patch = {
+    collectionDate: document.getElementById("editCollectionDate").value,
+    sessionDate: document.getElementById("editSessionDate").value,
+    session: document.getElementById("editSession").value,
+    type: document.getElementById("editType").value,
+    expected: expRaw==="" ? null : (parseFloat(expRaw)||0),
+    comment: document.getElementById("editComment").value.trim(),
+    denoms: editValues.slice()
+  };
+  closeEdit();
+  envelopesCol.doc(id).update(patch).then(function(){
+    toast("Envelope updated");
+  }).catch(function(err){
+    alert("Couldn't save changes: "+err.message);
+  });
+});
+document.getElementById("btnDeleteRecord").addEventListener("click", function(){
+  if(!confirm("Delete this envelope's record? This cannot be undone.")) return;
+  var id = editingId;
+  closeEdit();
+  envelopesCol.doc(id).delete().then(function(){
+    toast("Envelope deleted");
+  }).catch(function(err){
+    alert("Couldn't delete: "+err.message);
+  });
+});
+
+/* ================== INIT ================== */
+initCountView();
+populateSummaryDates();
+initFirebase();
+
+})();
+</script>
+</body>
+</html>
