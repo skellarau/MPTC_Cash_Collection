@@ -75,6 +75,21 @@
     font-size:.9rem;
     line-height:1.4;
   }
+  .row-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+    margin-bottom:4px;
+  }
+  .row-header h2{margin:0;}
+  .sort-select{
+    width:auto;
+    flex-shrink:0;
+    padding:6px 8px;
+    font-size:.78rem;
+    border-radius:6px;
+  }
   label{
     display:block;
     font-size:.82rem;
@@ -477,7 +492,13 @@
     </div>
 
     <div class="card">
-      <h2>Envelopes counted for this date</h2>
+      <div class="row-header">
+        <h2>Envelopes counted for this date</h2>
+        <select id="envSortOrder" class="sort-select">
+          <option value="entry">Order entered</option>
+          <option value="date">Envelope date</option>
+        </select>
+      </div>
       <p class="hint" id="envListHint">None yet — save your first envelope above.</p>
       <div class="envlist" id="envList"></div>
       <button class="btn btn-secondary btn-block" id="btnGoSummary">Finish &amp; view deposit summary →</button>
@@ -858,8 +879,14 @@ function attachListeners(){
 
   envelopesCol.onSnapshot(function(snap){
     state.records = snap.docs.map(function(d){ var data = d.data(); data.id = d.id; return data; });
+    state.records.sort(function(a,b){ return createdAtMillis(a) - createdAtMillis(b); });
     renderActive();
   }, function(err){ setStatus("Data sync error: "+err.message, true); });
+}
+
+function createdAtMillis(r){
+  if(r.createdAt && typeof r.createdAt.toMillis === "function") return r.createdAt.toMillis();
+  return Infinity;
 }
 
 function runBatchOps(ops){
@@ -1038,7 +1065,9 @@ function renderEnvList(){
     return;
   }
   hint.style.display="none";
-  list.sort(function(a,b){ return (a.sessionDate||"").localeCompare(b.sessionDate||""); });
+  if(document.getElementById("envSortOrder").value==="date"){
+    list.sort(function(a,b){ return (a.sessionDate||"").localeCompare(b.sessionDate||""); });
+  }
   list.forEach(function(r){
     var actual = actualOf(r);
     var dotClass = "na";
@@ -1050,7 +1079,7 @@ function renderEnvList(){
     el.innerHTML =
       '<span class="dot '+dotClass+'"></span>'+
       '<span class="meta"><span class="t1">'+fmtDateNice(r.sessionDate)+' · '+r.type+' · '+r.session+'</span>'+
-      (r.comment?'<span class="t2">'+escapeHtml(r.comment)+'</span>':'')+'</span>'+
+      (r.comment?' <span class="t2">'+escapeHtml(r.comment)+'</span>':'')+'</span>'+
       '<span class="amt">'+fmt(actual)+'</span><span class="chev">›</span>';
     el.addEventListener("click", function(){ openEdit(r.id); });
     wrap.appendChild(el);
@@ -1106,7 +1135,8 @@ document.getElementById("btnSaveEnvelope").addEventListener("click", function(){
     type: type,
     expected: expected,
     denoms: envValues.slice(),
-    comment: comment
+    comment: comment,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
   };
   prefs.collectionDate = cd;
   savePrefs();
@@ -1144,9 +1174,16 @@ document.getElementById("helpModal").addEventListener("click", function(e){
 
 function initCountView(){
   document.getElementById("countDate").value = prefs.collectionDate || todayStr();
+  document.getElementById("envSortOrder").value = prefs.envSort || "entry";
   resetEnvelopeForm();
   renderEnvList();
 }
+
+document.getElementById("envSortOrder").addEventListener("change", function(e){
+  prefs.envSort = e.target.value;
+  savePrefs();
+  renderEnvList();
+});
 
 /* ================== SUMMARY VIEW ================== */
 function uniqueCollectionDates(){
@@ -1457,7 +1494,8 @@ document.getElementById("fileImport").addEventListener("change", function(e){
             type: r.type,
             expected: (r.expected===undefined?null:r.expected),
             denoms: r.denoms,
-            comment: r.comment||""
+            comment: r.comment||"",
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
           }});
         });
         return runBatchOps(ops);
